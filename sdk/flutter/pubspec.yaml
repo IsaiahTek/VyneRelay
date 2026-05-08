@@ -1,7 +1,7 @@
 name: vynelix_relay_flutter
 description: Flutter client for VynRelay. Resilient real-time messaging with WebSocket/SSE fallback.
 version: 1.0.1
-homepage: https://github.com/vynelix/vynrelay
+homepage: "https://github.com/IsaiahTek/VyneRelay/tree/main/sdk/flutter"
 
 environment:
   sdk: ">=3.0.0 <4.0.0"

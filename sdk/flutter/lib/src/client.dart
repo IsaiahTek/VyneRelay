@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'dart:async'; // VynRelay Flutter SDK - Updated
 import 'dart:convert';
 import 'package:http/http.dart' as http;
