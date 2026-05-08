@@ -1,7 +1,9 @@
 {
   "name": "@vynelix/vynrelay-sdk",
   "version": "1.0.0",
-  "description": "Universal VynRelay client for Web and Node.js with SSE fallback support.",
+  "description": "Universal VynRelay client for Web and Node.js. Resilient messaging with automatic WebSocket to SSE fallback.",
+  "keywords": ["vynrelay", "sdk", "websocket", "sse", "realtime", "messaging", "resilient", "fallback"],
+  "author": "Vynelix",
   "type": "module",
   "main": "dist/client.js",
   "types": "dist/client.d.ts",

@@ -11,6 +11,14 @@
       "default": "./dist/index.js"
     }
   },
+  "description": "React hooks and providers for VynRelay. Seamlessly integrate real-time subscriptions and publishing into your React components.",
+  "keywords": ["react", "vynrelay", "hooks", "realtime", "messaging", "websocket", "sse"],
+  "author": "Vynelix",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc"
   },

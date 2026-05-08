@@ -1,9 +1,9 @@
 {
   "name": "backend-nestjs",
   "version": "0.0.1",
+  "private": true,
   "description": "",
   "author": "",
-  "private": true,
   "type": "module",
   "license": "UNLICENSED",
   "scripts": {
