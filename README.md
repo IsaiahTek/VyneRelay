@@ -4,12 +4,12 @@ VynRelay is a production-grade real-time messaging ecosystem designed for high a
 
 ## Key Features
 
-- **🚀 Shared Port Mode**: Intercept and handle real-time traffic (WS/SSE) on your main HTTP port.
-- **⚓ Dedicated Port Mode**: Run as a separate messaging microservice on its own port.
-- **🛡️ Protocol Resiliency**: Transparent fallback from WebSockets to Server-Sent Events (SSE).
-- **🔒 Secure by Design**: Pluggable ACL and Authentication hooks for granular control.
-- **📱 Cross-Platform**: Native SDKs for TypeScript (Web/Node) and Flutter (iOS/Android).
-- **📦 Distributed Persistence**: In-memory by default, with easy Redis/PostgreSQL adapters.
+- **Shared Port Mode**: Intercept and handle real-time traffic (WS/SSE) on your main HTTP port.
+- **Dedicated Port Mode**: Run as a separate messaging microservice on its own port.
+- **Protocol Resiliency**: Transparent fallback from WebSockets to Server-Sent Events (SSE).
+- **Secure by Design**: Pluggable ACL and Authentication hooks for granular control.
+- **Cross-Platform**: Native SDKs for TypeScript (Web/Node) and Flutter (iOS/Android).
+- **Distributed Persistence**: In-memory by default, with easy Redis/PostgreSQL adapters.
 
 ## Ecosystem Packages
 
