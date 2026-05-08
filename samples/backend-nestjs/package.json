@@ -24,7 +24,7 @@
     "@nestjs/common": "^11.1.19",
     "@nestjs/core": "^11.1.19",
     "@nestjs/platform-express": "^11.1.19",
-    "@vynelix/nestjs-multi-auth": "file:../mock-packages/@vynelix/nestjs-multi-auth",
+    "@vynelix/nestjs-multi-auth": "^1.0.0",
     "@vynelix/vynrelay-nestjs": "file:../../sdk/nestjs",
     "@vynelix/vynrelay-sdk": "file:../../sdk/typescript",
     "@vynelix/vynrelay-server": "file:../../server",

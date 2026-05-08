@@ -1,4 +1,7 @@
 {
+  "name": "vynrelay-examples",
+  "version": "1.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "demo:basic": "node --loader ts-node/esm ../examples/basic-chat/index.ts"

@@ -1,6 +1,7 @@
 {
   "name": "@vynelix/vynrelay-server",
   "version": "1.0.0",
+  "type": "module",
   "description": "High-performance real-time messaging engine with WebSocket and SSE support. Featuring unique Shared Port Architecture for NestJS/Express.",
   "keywords": ["realtime", "messaging", "websocket", "sse", "server-sent-events", "nestjs", "express", "shared-port", "vynrelay", "vynelix"],
   "author": "Vynelix",
