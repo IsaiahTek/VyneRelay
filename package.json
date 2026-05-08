@@ -1,6 +1,6 @@
 {
   "name": "vynrelay-monorepo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "VynRelay: A production-grade real-time messaging ecosystem with Shared Port Architecture and resilient WebSocket/SSE fallback.",
   "keywords": ["realtime", "messaging", "monorepo", "vynrelay", "websocket", "sse", "nestjs", "flutter"],
   "author": "Vynelix",

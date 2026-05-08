@@ -253,6 +253,50 @@ export class VynServer {
     this.internalListeners.get(topic)?.delete(callback);
   }
 
+  /**
+   * Publishes a message to a topic from the server.
+   */
+  public async publish(topic: string, payload: any, options?: { id?: string; timestamp?: number }): Promise<void> {
+    const packet: Packet = {
+      id: options?.id || nanoid(),
+      op: 'PUB',
+      topic,
+      payload,
+      timestamp: options?.timestamp || Date.now(),
+    };
+
+    const config = this.getTopicConfig(topic);
+    if (config.persistence) {
+      await this.store.push(topic, {
+        id: packet.id,
+        topic: packet.topic!,
+        payload: packet.payload,
+        timestamp: packet.timestamp,
+      });
+    }
+
+    const subscribers = this.topicManager.getMatchingSubscribers(topic);
+    for (const subId of subscribers) {
+      const outbound: Packet = { ...packet, ack: config.ackRequired };
+      if (config.ackRequired) {
+        this.sendWithAck(subId, outbound, {
+          ackTimeoutMs: config.ackTimeoutMs || 5000,
+          maxAttempts: config.maxDeliveryAttempts || 5,
+        });
+      } else {
+        this.send(subId, outbound);
+      }
+    }
+
+    const internal = this.internalListeners.get(topic);
+    if (internal) {
+      for (const cb of internal) {
+        try { cb(payload); } catch (err) {}
+      }
+    }
+  }
+
+
   private handleConnection(ws: WebSocket, upgradeUser: any) {
     const clientId = nanoid();
     const session: ClientSession = {
@@ -342,19 +386,10 @@ export class VynServer {
   private async handlePublish(clientId: string, packet: Packet) {
     if (!packet.topic) return;
     if (!(await this.checkAcl(clientId, packet.topic, 'write'))) {
-      this.send(clientId, { id: packet.id, op: 'ERROR', payload: { code: 403, message: 'Forbidden' }, timestamp: Date.now() }); return;
+      this.send(clientId, { id: packet.id, op: 'ERROR', payload: { code: 403, message: 'Forbidden' }, timestamp: Date.now() });
+      return;
     }
-    const config = this.getTopicConfig(packet.topic);
-    if (config.persistence) await this.store.push(packet.topic, { id: packet.id, topic: packet.topic, payload: packet.payload, timestamp: packet.timestamp });
-
-    const subscribers = this.topicManager.getMatchingSubscribers(packet.topic);
-    for (const subId of subscribers) {
-      const outbound: Packet = { id: packet.id, op: 'PUB', topic: packet.topic, payload: packet.payload, timestamp: packet.timestamp, ack: config.ackRequired };
-      if (config.ackRequired) this.sendWithAck(subId, outbound, { ackTimeoutMs: config.ackTimeoutMs || 5000, maxAttempts: config.maxDeliveryAttempts || 5 });
-      else this.send(subId, outbound);
-    }
-    const internal = this.internalListeners.get(packet.topic);
-    if (internal) for (const cb of internal) try { cb(packet.payload); } catch (err) {}
+    await this.publish(packet.topic, packet.payload, { id: packet.id, timestamp: packet.timestamp });
   }
 
   private async handleSubscribe(clientId: string, packet: Packet) {

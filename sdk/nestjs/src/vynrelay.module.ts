@@ -40,6 +40,35 @@ export class VynRelayModule implements OnApplicationBootstrap, OnModuleInit {
     };
   }
 
+  /**
+   * Register the VynRelay server asynchronously.
+   */
+  static forRootAsync(options: {
+    imports?: any[];
+    useFactory: (...args: any[]) => Promise<VynServerOptions> | VynServerOptions;
+    inject?: any[];
+  }): DynamicModule {
+    const optionsProvider = {
+      provide: VYN_RELAY_OPTIONS,
+      useFactory: options.useFactory,
+      inject: options.inject || [],
+    };
+
+    const serverProvider = {
+      provide: VYN_RELAY_SERVER,
+      useFactory: (opts: VynServerOptions) => new VynServer(opts),
+      inject: [VYN_RELAY_OPTIONS],
+    };
+
+    return {
+      module: VynRelayModule,
+      imports: [...(options.imports || []), DiscoveryModule],
+      providers: [VynRelayModule, optionsProvider, serverProvider],
+      exports: [serverProvider],
+    };
+  }
+
+
   private initialized = false;
 
   onModuleInit() {

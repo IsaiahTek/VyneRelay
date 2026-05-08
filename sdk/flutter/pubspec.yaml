@@ -1,6 +1,6 @@
 name: vynelix_relay_flutter
-description: A production-grade realtime messaging SDK for Flutter, powered by VynRelay.
-version: 1.0.0
+description: Flutter client for VynRelay. Resilient real-time messaging with WebSocket/SSE fallback.
+version: 1.0.1
 homepage: https://github.com/vynelix/vynrelay
 
 environment:
