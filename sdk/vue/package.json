@@ -11,6 +11,9 @@
       "default": "./dist/index.js"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Vue compositions and components for VynRelay. Add real-time messaging capabilities to your Vue 3 applications.",
   "keywords": ["vue", "vue3", "vynrelay", "realtime", "messaging", "websocket", "sse"],
   "author": "Vynelix",
