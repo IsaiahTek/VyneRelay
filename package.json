@@ -1,0 +1,19 @@
+{
+  "name": "vynrelay-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm test --workspaces --if-present"
+  },
+  "workspaces": [
+    "server",
+    "sdk/*",
+    "examples",
+    "examples/*",
+    "samples/*"
+  ],
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

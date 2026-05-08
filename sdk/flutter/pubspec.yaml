@@ -1,0 +1,25 @@
+name: vynelix_relay_flutter
+description: A production-grade realtime messaging SDK for Flutter, powered by VynRelay.
+version: 1.0.0
+homepage: https://github.com/vynelix/vynrelay
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  web_socket_channel: ">=2.4.0 <4.0.0"
+  http: ">=1.1.0 <2.0.0"
+  uuid: ">=4.0.0 <5.0.0"
+  nanoid: ">=1.0.0 <2.0.0"
+  collection: ">=1.17.0 <2.0.0"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

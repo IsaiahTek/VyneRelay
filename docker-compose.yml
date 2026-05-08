@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  vynrelay:
+    build: 
+      context: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - PERSISTENCE=redis
+      - REDIS_URL=redis://redis:6379
+      - AUTH_TOKEN=secret_token
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"

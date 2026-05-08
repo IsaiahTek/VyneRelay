@@ -1,0 +1,11 @@
+{
+  "type": "module",
+  "scripts": {
+    "demo:basic": "node --loader ts-node/esm ../examples/basic-chat/index.ts"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}

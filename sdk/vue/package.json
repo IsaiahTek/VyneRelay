@@ -1,0 +1,25 @@
+{
+  "name": "@vynelix/vynrelay-vue",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0",
+    "@vynelix/vynrelay-sdk": "*"
+  },
+  "devDependencies": {
+    "vue": "^3.5.13",
+    "typescript": "^6.0.3"
+  }
+}

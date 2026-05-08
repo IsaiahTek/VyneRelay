@@ -1,0 +1,42 @@
+{
+  "name": "@vynelix/vynrelay-server",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/standalone.js",
+    "dev": "node --loader ts-node/esm src/standalone.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "demo:basic": "node --loader ts-node/esm ../examples/basic-chat/index.ts",
+    "demo:offline": "node --loader ts-node/esm ../examples/offline-sync-demo.ts"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "ioredis": "^5.10.1",
+    "nanoid": "3.3.7",
+    "ws": "^8.20.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/ws": "^8.18.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.4"
+  }
+}

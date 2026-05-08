@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "server" },
+    { "path": "sdk/typescript" },
+    { "path": "sdk/react" },
+    { "path": "sdk/vue" },
+    { "path": "sdk/nestjs" }
+  ]
+}
