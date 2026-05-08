@@ -5,6 +5,7 @@ VynRelay is a production-grade real-time messaging ecosystem designed for high a
 ## Key Features
 
 - **🚀 Shared Port Mode**: Intercept and handle real-time traffic (WS/SSE) on your main HTTP port.
+- **⚓ Dedicated Port Mode**: Run as a separate messaging microservice on its own port.
 - **🛡️ Protocol Resiliency**: Transparent fallback from WebSockets to Server-Sent Events (SSE).
 - **🔒 Secure by Design**: Pluggable ACL and Authentication hooks for granular control.
 - **📱 Cross-Platform**: Native SDKs for TypeScript (Web/Node) and Flutter (iOS/Android).
@@ -30,8 +31,9 @@ npm install @vynelix/vynrelay-nestjs @vynelix/vynrelay-sdk
 ```typescript
 // app.module.ts
 VynRelayModule.forRoot({
+  // Omit 'port' for Shared Port Mode (uses NestJS port)
+  // Or: port: 3001 for Dedicated Port Mode
   upgradeHandler: async (req) => {
-    // Identity logic
     return { id: 'alice' };
   }
 })
@@ -42,7 +44,12 @@ VynRelayModule.forRoot({
 import { VynClient } from '@vynelix/vynrelay-sdk';
 
 const client = new VynClient({
+  // Shared Port: Connect to the NestJS URL + /vynrelay
   url: 'ws://localhost:3000/vynrelay',
+  
+  // Dedicated Port: Connect directly to the VynRelay port
+  // url: 'ws://localhost:3001',
+  
   username: 'alice'
 });
 

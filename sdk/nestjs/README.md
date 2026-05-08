@@ -28,7 +28,11 @@ import { VynRelayModule } from '@vynelix/vynrelay-nestjs';
 @Module({
   imports: [
     VynRelayModule.forRoot({
-      // Shared port mode is active by default (no 'port' property provided)
+      // 1. Shared Port Mode (Default)
+      // Omit 'port' to use the same port as your NestJS app
+      
+      // 2. Dedicated Port Mode (Optional)
+      // port: 3001, // Run messaging on a separate port
       
       upgradeHandler: async (req) => {
         // Handle identity during the initial handshake (Cookies or Query string)
