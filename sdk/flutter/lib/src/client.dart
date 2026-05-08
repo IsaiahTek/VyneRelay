@@ -80,7 +80,7 @@ class VynClient {
       _transport = 'ws';
 
       _startHeartbeat();
-      
+
       if (options.getToken != null) {
         final token = await options.getToken!();
         await authenticate(token);
@@ -126,7 +126,7 @@ class VynClient {
   void unsubscribe(String topic, VynMessageHandler handler) {
     if (!_subscriptions.containsKey(topic)) return;
     _subscriptions[topic]!.remove(handler);
-    
+
     if (_subscriptions[topic]!.isEmpty) {
       _subscriptions.remove(topic);
       _send(VynPacket(
@@ -158,16 +158,17 @@ class VynClient {
           _clientId = packet.payload['clientId'];
           _initialized = true;
           _subscriptions.keys.forEach((topic) {
-             _send(VynPacket(
-                id: nanoid(),
-                op: VynOp.sub,
-                topic: topic,
-                timestamp: DateTime.now().millisecondsSinceEpoch,
-              ));
+            _send(VynPacket(
+              id: nanoid(),
+              op: VynOp.sub,
+              topic: topic,
+              timestamp: DateTime.now().millisecondsSinceEpoch,
+            ));
           });
           break;
         case VynOp.pub:
-          if (packet.topic != null && _subscriptions.containsKey(packet.topic)) {
+          if (packet.topic != null &&
+              _subscriptions.containsKey(packet.topic)) {
             for (final handler in _subscriptions[packet.topic]!) {
               handler(packet.payload);
             }
@@ -200,15 +201,20 @@ class VynClient {
     _sseSubscription?.cancel();
 
     _reconnectAttempts++;
-    
-    if (options.useSSEFallback && _reconnectAttempts > options.maxReconnectAttempts && _transport == 'ws') {
+
+    if (options.useSSEFallback &&
+        _reconnectAttempts > options.maxReconnectAttempts &&
+        _transport == 'ws') {
       print('VynRelay: WebSocket failed. Falling back to SSE...');
       _connectSse();
       return;
     }
 
-    final delay = (options.reconnectIntervalMs * (1 << (_reconnectAttempts > 5 ? 5 : _reconnectAttempts))).clamp(1000, 30000);
-    print('VynRelay: Disconnected. Reconnecting in ${delay}ms... (Attempt $_reconnectAttempts)');
+    final delay = (options.reconnectIntervalMs *
+            (1 << (_reconnectAttempts > 5 ? 5 : _reconnectAttempts)))
+        .clamp(1000, 30000);
+    print(
+        'VynRelay: Disconnected. Reconnecting in ${delay}ms... (Attempt $_reconnectAttempts)');
 
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(Duration(milliseconds: delay), () {
@@ -226,13 +232,12 @@ class VynClient {
     if (baseUrl.endsWith('/vynrelay')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 9);
     }
-    
+
     String sseUrl = '$baseUrl/vynrelay/sse';
     if (options.username != null) {
       final joiner = sseUrl.contains('?') ? '&' : '?';
       sseUrl += '${joiner}x-username=${Uri.encodeComponent(options.username!)}';
     }
-
 
     try {
       final client = http.Client();
@@ -250,7 +255,9 @@ class VynClient {
         if (line.startsWith('data: ')) {
           _handleMessage(line.substring(6));
         }
-      }, onDone: () => _handleDisconnect(), onError: (e) => _handleDisconnect());
+      },
+              onDone: () => _handleDisconnect(),
+              onError: (e) => _handleDisconnect());
 
       _startHeartbeat();
     } catch (e) {
@@ -260,7 +267,8 @@ class VynClient {
 
   void _startHeartbeat() {
     _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(Duration(milliseconds: options.heartbeatIntervalMs), (timer) {
+    _heartbeatTimer = Timer.periodic(
+        Duration(milliseconds: options.heartbeatIntervalMs), (timer) {
       if (_connected) {
         _send(VynPacket(
           id: nanoid(),
@@ -273,9 +281,9 @@ class VynClient {
 
   void _send(VynPacket packet) {
     if (!_connected) return;
-    
+
     final json = jsonEncode(packet.toJson());
-    
+
     if (_transport == 'ws' && _channel != null) {
       _channel!.sink.add(json);
     } else {
@@ -284,14 +292,16 @@ class VynClient {
         baseUrl = baseUrl.substring(0, baseUrl.length - 9);
       }
       final postUrl = '$baseUrl/vynrelay/packet';
-      http.post(
+      http
+          .post(
         Uri.parse(postUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'clientId': _clientId,
           'packet': packet.toJson(),
         }),
-      ).then((res) {
+      )
+          .then((res) {
         if (res.statusCode != 200) {
           print('VynRelay SSE Send Error: ${res.statusCode}');
         }

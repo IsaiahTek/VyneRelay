@@ -34,7 +34,9 @@ class _ChatPageState extends State<ChatPage> {
   late VynClient _client;
   final List<Map<String, dynamic>> _messages = [];
   final TextEditingController _controller = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController(text: 'FlutterUser');
+  final TextEditingController _usernameController = TextEditingController(
+    text: 'FlutterUser',
+  );
   final TextEditingController _recipientController = TextEditingController();
   bool _isConnected = false;
   bool _isJoined = false;
@@ -44,22 +46,26 @@ class _ChatPageState extends State<ChatPage> {
 
   void _join() async {
     if (_usernameController.text.isEmpty) return;
-    
+
     setState(() {
       _isJoined = true;
     });
 
-    _client = VynClient(VynClientOptions(
-      url: 'ws://192.168.1.8:3000/vynrelay',
-      username: _usernameController.text,
-      autoConnect: true,
-    ));
+    _client = VynClient(
+      VynClientOptions(
+        url: 'ws://192.168.1.8:3000/vynrelay',
+        username: _usernameController.text,
+        autoConnect: true,
+      ),
+    );
 
     try {
-      await Future.delayed(const Duration(milliseconds: 500)); 
+      await Future.delayed(const Duration(milliseconds: 500));
       await _client.authenticate(_usernameController.text);
-      
-      _client.subscribe('user.${_usernameController.text.toLowerCase()}', (payload) {
+
+      _client.subscribe('user.${_usernameController.text.toLowerCase()}', (
+        payload,
+      ) {
         if (mounted) {
           setState(() {
             _messages.add({...payload, 'type': 'private'});
@@ -93,8 +99,8 @@ class _ChatPageState extends State<ChatPage> {
 
   void _sendMessage() {
     if (_controller.text.isNotEmpty) {
-      final topic = _isPrivate && _recipientController.text.isNotEmpty 
-          ? 'user.${_recipientController.text.toLowerCase()}' 
+      final topic = _isPrivate && _recipientController.text.isNotEmpty
+          ? 'user.${_recipientController.text.toLowerCase()}'
           : 'public.chat';
 
       _client.publish(topic, {
@@ -109,7 +115,7 @@ class _ChatPageState extends State<ChatPage> {
             'text': _controller.text,
             'user': 'To: ${_recipientController.text}',
             'type': 'private',
-            'timestamp': 'Now'
+            'timestamp': 'Now',
           });
         });
       }
@@ -139,7 +145,12 @@ class _ChatPageState extends State<ChatPage> {
               decoration: BoxDecoration(
                 color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(32),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 20)],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .3),
+                    blurRadius: 20,
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -151,10 +162,21 @@ class _ChatPageState extends State<ChatPage> {
                       color: const Color(0xFF2563EB),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 32),
+                    child: const Icon(
+                      Icons.chat_bubble_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
                   ),
                   const SizedBox(height: 24),
-                  const Text('VynRelay', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+                  const Text(
+                    'VynRelay',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                   const SizedBox(height: 32),
                   TextField(
                     controller: _usernameController,
@@ -164,7 +186,10 @@ class _ChatPageState extends State<ChatPage> {
                       hintStyle: const TextStyle(color: Color(0xFF475569)),
                       filled: true,
                       fillColor: const Color(0xFF0F172A),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -174,10 +199,15 @@ class _ChatPageState extends State<ChatPage> {
                       backgroundColor: const Color(0xFF2563EB),
                       foregroundColor: Colors.white,
                       minimumSize: const Size.fromHeight(56),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
-                    child: const Text('Start Chatting', style: TextStyle(fontWeight: FontWeight.bold)),
-                  )
+                    child: const Text(
+                      'Start Chatting',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -186,9 +216,11 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
 
-    final filteredMessages = _messages.where((m) => 
-      _isPrivate ? m['type'] == 'private' : m['type'] == 'public'
-    ).toList();
+    final filteredMessages = _messages
+        .where(
+          (m) => _isPrivate ? m['type'] == 'private' : m['type'] == 'public',
+        )
+        .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -196,8 +228,17 @@ class _ChatPageState extends State<ChatPage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_isPrivate ? 'Direct Messages' : '# Global Chat', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            Text('$transport • $status', style: TextStyle(fontSize: 10, color: _isConnected ? Colors.green : Colors.orange)),
+            Text(
+              _isPrivate ? 'Direct Messages' : '# Global Chat',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '$transport • $status',
+              style: TextStyle(
+                fontSize: 10,
+                color: _isConnected ? Colors.green : Colors.orange,
+              ),
+            ),
           ],
         ),
         backgroundColor: const Color(0xFF1E293B),
@@ -215,16 +256,28 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             if (_isPrivate)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 color: const Color(0xFF1E293B),
                 child: Row(
                   children: [
-                    const Text('To:', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
+                    const Text(
+                      'To:',
+                      style: TextStyle(
+                        color: Color(0xFF64748B),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: TextField(
                         controller: _recipientController,
-                        style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                        ),
                         decoration: const InputDecoration(
                           hintText: 'Recipient...',
                           hintStyle: TextStyle(color: Color(0xFF334155)),
@@ -237,35 +290,54 @@ class _ChatPageState extends State<ChatPage> {
               ),
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 itemCount: filteredMessages.length,
                 itemBuilder: (context, index) {
                   final m = filteredMessages[index];
-                  final isMe = m['user'] == _usernameController.text || m['user'].toString().startsWith('To: ');
+                  final isMe =
+                      m['user'] == _usernameController.text ||
+                      m['user'].toString().startsWith('To: ');
                   final isPrivate = m['type'] == 'private';
-        
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Column(
-                      crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                      crossAxisAlignment: isMe
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
                       children: [
                         if (!isMe)
                           Padding(
                             padding: const EdgeInsets.only(left: 12, bottom: 4),
-                            child: Text(m['user'], style: const TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
+                            child: Text(
+                              m['user'],
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Color(0xFF64748B),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: isMe 
-                                ? (isPrivate ? const Color(0xFF9333EA) : const Color(0xFF2563EB)) 
+                            color: isMe
+                                ? (isPrivate
+                                      ? const Color(0xFF9333EA)
+                                      : const Color(0xFF2563EB))
                                 : const Color(0xFF1E293B),
                             borderRadius: BorderRadius.circular(24).copyWith(
                               bottomRight: isMe ? Radius.zero : null,
                               bottomLeft: !isMe ? Radius.zero : null,
                             ),
                           ),
-                          child: Text(m['text'] ?? '', style: const TextStyle(color: Colors.white)),
+                          child: Text(
+                            m['text'] ?? '',
+                            style: const TextStyle(color: Colors.white),
+                          ),
                         ),
                       ],
                     ),
@@ -286,8 +358,13 @@ class _ChatPageState extends State<ChatPage> {
                         hintStyle: const TextStyle(color: Color(0xFF475569)),
                         filled: true,
                         fillColor: const Color(0xFF1E293B),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                        ),
                       ),
                       onSubmitted: (_) => _sendMessage(),
                     ),
