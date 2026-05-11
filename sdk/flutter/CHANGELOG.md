@@ -5,3 +5,7 @@ This release marks the first official release of the project. It includes the fo
 - Added the `vynelix_relay_flutter` package to the `pubspec.yaml` file.
 - Updated the `example` directory with a basic Flutter app.
 - Added basic documentation to the package.
+
+# v1.0.2
+## Minor Release
+This release addresses some minor issues
