@@ -1,16 +1,16 @@
 {
   "name": "@vynelix/vynrelay-nestjs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "NestJS integration for VynRelay. Add real-time messaging decorators and shared-port support to any NestJS app.",
   "keywords": ["nestjs", "vynrelay", "realtime", "messaging", "websocket", "sse", "decorators"],
   "author": "Vynelix",
-  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },
