@@ -5,18 +5,36 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:nanoid/nanoid.dart';
+import 'package:flutter/foundation.dart';
 import 'types.dart';
 
+/// VynClientOptions specify how you want to connect to a VynRelay Realtime Messaging server.
 class VynClientOptions {
+  /// The URL of the VynRelay server.
   final String url;
+
+  /// The username to use for authentication.
   final String? username; // Identity hint for initial handshake
+
+  /// Optional function to retrieve an authentication token.
   final Future<String> Function()? getToken;
+
+  /// Whether to automatically connect to the server.
   final bool autoConnect;
+
+  /// The interval in milliseconds at which to reconnect to the server.
   final int reconnectIntervalMs;
+
+  /// The interval in milliseconds at which to send heartbeat pings.
   final int heartbeatIntervalMs;
+
+  /// Whether to fall back to SSE if WebSocket fails.
   final bool useSSEFallback;
+
+  /// The maximum number of reconnect attempts.
   final int maxReconnectAttempts;
 
+  /// Creates a new instance of VynClientOptions.
   VynClientOptions({
     required this.url,
     this.username,
@@ -29,10 +47,13 @@ class VynClientOptions {
   });
 }
 
+/// VynClient is a Dart client for connecting to a VynRelay Realtime Messaging server.
 class VynClient {
+  /// The options used to configure the client.
   final VynClientOptions options;
+  
   WebSocketChannel? _channel;
-  bool _connected = false;
+  bool __connected = false;
   bool _initialized = false;
   String? _clientId;
   Timer? _heartbeatTimer;
@@ -43,16 +64,38 @@ class VynClient {
   StreamSubscription? _sseSubscription;
 
   final Map<String, Set<VynMessageHandler>> _subscriptions = {};
+  final List<VynPacket> _messageQueue = [];
+  void Function(bool)? _statusCallback;
 
+  /// Creates a new instance of VynClient.
   VynClient(this.options) {
     if (options.autoConnect) {
       connect();
     }
   }
 
+  set _connected(bool value) {
+    if (__connected != value) {
+      __connected = value;
+      _statusCallback?.call(__connected);
+    }
+  }
+
+  bool get _connected => __connected;
+
   bool get isConnected => _connected;
+
+  /// Sets the callback to be called when the client's connection status changes.
+  void onStatusChange(void Function(bool) callback) {
+    _statusCallback = callback;
+    // Immediate callback with current state
+    callback(_connected);
+  }
+
+  /// Gets the current transport method (WS or SSE).
   String get transport => _transport.toUpperCase();
 
+  /// Connects to the VynRelay server.
   Future<void> connect() async {
     if (_connected) return;
 
@@ -61,19 +104,23 @@ class VynClient {
     }
 
     try {
-      String url = options.url;
+      Uri uri = Uri.parse(options.url);
       if (options.username != null) {
-        final joiner = url.contains('?') ? '&' : '?';
-        url += '${joiner}x-username=${Uri.encodeComponent(options.username!)}';
+        final queryParams = Map<String, String>.from(uri.queryParameters);
+        queryParams['x-username'] = options.username!;
+        uri = uri.replace(queryParameters: queryParams, fragment: '');
       }
 
-      _channel = WebSocketChannel.connect(Uri.parse(url));
-      _connected = true;
+      debugPrint('VynRelay: Connecting to $uri (WS)...');
+      _channel = WebSocketChannel.connect(uri);
 
       _channel!.stream.listen(
         (data) => _handleMessage(data),
         onDone: () => _handleDisconnect(),
-        onError: (err) => _handleDisconnect(),
+        onError: (err) {
+          debugPrint('VynRelay: WebSocket Error: $err');
+          _handleDisconnect();
+        },
       );
 
       _reconnectAttempts = 0;
@@ -86,10 +133,12 @@ class VynClient {
         await authenticate(token);
       }
     } catch (e) {
+      debugPrint('VynRelay: Connection Error: $e');
       _handleDisconnect();
     }
   }
 
+  /// Disconnects from the VynRelay server.
   void disconnect() {
     _connected = false;
     _channel?.sink.close();
@@ -98,6 +147,7 @@ class VynClient {
     _sseSubscription?.cancel();
   }
 
+  /// Authenticates the client using the provided token.
   Future<void> authenticate(String token) async {
     _currentToken = token;
     if (!_connected) return;
@@ -110,6 +160,7 @@ class VynClient {
     ));
   }
 
+  /// Subscribes to a topic and registers a message handler.
   void subscribe(String topic, VynMessageHandler handler) {
     if (!_subscriptions.containsKey(topic)) {
       _subscriptions[topic] = {};
@@ -123,6 +174,7 @@ class VynClient {
     _subscriptions[topic]!.add(handler);
   }
 
+  /// Unsubscribes from a topic and removes a message handler.
   void unsubscribe(String topic, VynMessageHandler handler) {
     if (!_subscriptions.containsKey(topic)) return;
     _subscriptions[topic]!.remove(handler);
@@ -138,12 +190,27 @@ class VynClient {
     }
   }
 
+  /// Publishes a message to a topic.
   void publish(String topic, dynamic payload) {
     _send(VynPacket(
       id: nanoid(),
       op: VynOp.pub,
       topic: topic,
       payload: payload,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+    ));
+  }
+
+  /// Replays messages from a topic.
+  void replay(String topic, {String? sinceId, int? sinceTimestamp}) {
+    _send(VynPacket(
+      id: nanoid(),
+      op: VynOp.replay,
+      topic: topic,
+      payload: {
+        if (sinceId != null) 'sinceId': sinceId,
+        if (sinceTimestamp != null) 'sinceTimestamp': sinceTimestamp,
+      },
       timestamp: DateTime.now().millisecondsSinceEpoch,
     ));
   }
@@ -156,7 +223,11 @@ class VynClient {
       switch (packet.op) {
         case VynOp.connack:
           _clientId = packet.payload['clientId'];
+          _connected = true;
           _initialized = true;
+          debugPrint('VynRelay: Registered with ClientID $_clientId');
+          
+          // Resubscribe to all active topics
           _subscriptions.keys.forEach((topic) {
             _send(VynPacket(
               id: nanoid(),
@@ -165,6 +236,7 @@ class VynClient {
               timestamp: DateTime.now().millisecondsSinceEpoch,
             ));
           });
+          _flushQueue();
           break;
         case VynOp.pub:
           if (packet.topic != null &&
@@ -280,34 +352,57 @@ class VynClient {
   }
 
   void _send(VynPacket packet) {
-    if (!_connected) return;
+    if (_connected) {
+      final json = jsonEncode(packet.toJson());
 
-    final json = jsonEncode(packet.toJson());
-
-    if (_transport == 'ws' && _channel != null) {
-      _channel!.sink.add(json);
-    } else {
-      String baseUrl = options.url.replaceFirst('ws', 'http');
-      if (baseUrl.endsWith('/vynrelay')) {
-        baseUrl = baseUrl.substring(0, baseUrl.length - 9);
-      }
-      final postUrl = '$baseUrl/vynrelay/packet';
-      http
-          .post(
-        Uri.parse(postUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'clientId': _clientId,
-          'packet': packet.toJson(),
-        }),
-      )
-          .then((res) {
-        if (res.statusCode != 200) {
-          print('VynRelay SSE Send Error: ${res.statusCode}');
+      if (_transport == 'ws' && _channel != null) {
+        try {
+          _channel!.sink.add(json);
+        } catch (e) {
+          debugPrint('VynRelay: Failed to send WS packet: $e');
+          _handleDisconnect();
         }
-      }).catchError((e) {
-        print('VynRelay SSE Send Error: $e');
-      });
+      } else {
+        _sendSse(packet);
+      }
+    } else {
+      debugPrint('VynRelay: Offline. Queuing packet ${packet.op}');
+      _messageQueue.add(packet);
     }
+  }
+
+  void _flushQueue() {
+    if (_messageQueue.isNotEmpty && _connected) {
+      debugPrint('VynRelay: Flushing ${_messageQueue.length} queued messages');
+      while (_messageQueue.isNotEmpty && _connected) {
+        final packet = _messageQueue.removeAt(0);
+        _send(packet);
+      }
+    }
+  }
+
+  void _sendSse(VynPacket packet) {
+    final json = jsonEncode(packet.toJson());
+    String baseUrl = options.url.replaceFirst('ws', 'http');
+    if (baseUrl.endsWith('/vynrelay')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 9);
+    }
+    final postUrl = '$baseUrl/vynrelay/packet';
+    http
+        .post(
+      Uri.parse(postUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'clientId': _clientId,
+        'packet': packet.toJson(),
+      }),
+    )
+        .then((res) {
+      if (res.statusCode != 200) {
+        print('VynRelay SSE Send Error: ${res.statusCode}');
+      }
+    }).catchError((e) {
+      print('VynRelay SSE Send Error: $e');
+    });
   }
 }
