@@ -25,9 +25,11 @@
   "scripts": {
     "build": "tsc"
   },
-  "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
+  "dependencies": {
     "@vynelix/vynrelay-sdk": "*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

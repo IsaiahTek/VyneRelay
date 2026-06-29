@@ -25,9 +25,11 @@
   "scripts": {
     "build": "tsc"
   },
-  "peerDependencies": {
-    "vue": "^3.0.0",
+  "dependencies": {
     "@vynelix/vynrelay-sdk": "*"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
   },
   "devDependencies": {
     "vue": "^3.5.13",

@@ -54,4 +54,5 @@ export const useVynClient = () => {
   return context.client;
 };
 
-export * from './useVynSubscription.jsx';
+export * from './useVynSubscription.js';
+export * from '@vynelix/vynrelay-sdk';

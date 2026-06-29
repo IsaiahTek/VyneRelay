@@ -60,3 +60,5 @@ export function useVynSubscription<T = any>(
 
   return data;
 }
+
+export * from '@vynelix/vynrelay-sdk';

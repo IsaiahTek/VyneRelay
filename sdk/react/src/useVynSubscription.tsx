@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useVynClient } from './index.jsx'; // Assume compiled extension or setup handles this
+import { useVynClient } from './index.js'; // Assume compiled extension or setup handles this
 
 /**
  * useVynSubscription — A hook to subscribe to a VynRelay topic within a component.
